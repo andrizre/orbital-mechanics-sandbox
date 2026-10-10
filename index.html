@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Orbital Mechanics Sandbox</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<canvas id="canvas"></canvas>
+<div id="hud">
+  <div id="panel">
+    <h1>🪐 Orbital Mechanics Sandbox</h1>
+    <div class="row presets">
+      <button data-preset="sun" class="active">Sun System</button>
+      <button data-preset="binary">Binary + Belt</button>
+      <button data-preset="cluster">Cluster</button>
+      <button data-preset="figure8">Figure-8</button>
+      <button data-preset="chaos">Chaos</button>
+    </div>
+    <div class="row">
+      <label>Spawn mode
+        <select id="mode">
+          <option value="orbit">Drag → orbit launch</option>
+          <option value="slingshot">Drag → light slingshot</option>
+          <option value="body">Click → drop heavy body</option>
+        </select>
+      </label>
+      <label>Speed
+        <input type="range" id="speed" min="0.1" max="4" step="0.1" value="1">
+      </label>
+    </div>
+    <div class="row toggles">
+      <label><input type="checkbox" id="trails" checked> Trails</label>
+      <label><input type="checkbox" id="vectors"> Vectors</label>
+      <label><input type="checkbox" id="collisions" checked> Merge on collision</label>
+      <button id="pauseBtn">⏸ Pause</button>
+      <button id="clearBtn">Clear</button>
+      <button id="resetView">Reset view</button>
+    </div>
+    <div class="row stats">
+      <span>Bodies: <b id="bodyCount">0</b></span>
+      <span>Merges: <b id="collCount">0</b></span>
+      <span>FPS: <b id="fps">–</b></span>
+    </div>
+  </div>
+  <div id="help">
+    <b>Drag</b> on canvas to launch a body • <b>Right-drag / Space+drag</b> pan • <b>Scroll</b> zoom<br>
+    Keys: <b>1–5</b> presets • <b>P</b> pause • <b>T</b> trails • <b>V</b> vectors • <b>C</b> clear • <b>F</b> recenter
+  </div>
+</div>
+<script src="main.js"></script>
+</body>
+</html>
