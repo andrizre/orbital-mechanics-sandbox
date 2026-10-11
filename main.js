@@ -120,8 +120,30 @@ function screenToWorld(sx, sy) {
   return [(sx - innerWidth / 2) / zoom + camera.x, (sy - innerHeight / 2) / zoom + camera.y];
 }
 
+// ---------- Follow / selection ----------
+let followed = null; // body the camera tracks
+function pickBody(sx, sy) {
+  let best = null, bestD = Infinity;
+  for (const b of bodies) {
+    const [bx, by] = worldToScreen(b.x, b.y);
+    const r = Math.max(6, b.radius * zoom + 6);
+    const d = Math.hypot(sx - bx, sy - by);
+    if (d < r && d < bestD) { best = b; bestD = d; }
+  }
+  return best;
+}
+function follow(b) {
+  followed = b;
+  const el = document.getElementById('followInfo');
+  el.style.display = b ? '' : 'none';
+}
+function toggleFollowAt(sx, sy) {
+  const b = pickBody(sx, sy);
+  follow(b === followed ? null : b);
+}
+
 // ---------- Presets ----------
-function clearBodies() { bodies = []; totalCollisions = 0; }
+function clearBodies() { bodies = []; totalCollisions = 0; follow(null); }
 
 function presetSunSystem() {
   clearBodies();
@@ -250,6 +272,9 @@ addEventListener('pointerup', (e) => {
     bodies.push(makeBody(x, y, vx, vy, mass, col));
   }
 });
+canvas.addEventListener('dblclick', (e) => {
+  toggleFollowAt(e.clientX, e.clientY);
+});
 canvas.addEventListener('contextmenu', e => e.preventDefault());
 canvas.addEventListener('wheel', (e) => {
   e.preventDefault();
@@ -275,6 +300,7 @@ addEventListener('keydown', (e) => {
   if (e.key === 't' || e.key === 'T') { showTrails = !showTrails; ui.trails.checked = showTrails; }
   if (e.key === 'v' || e.key === 'V') { showVectors = !showVectors; ui.vectors.checked = showVectors; }
   if (e.key === 'f' || e.key === 'F') { camera = { x: 0, y: 0 }; }
+  if (e.key === 'Escape') follow(null);
 });
 addEventListener('keyup', (e) => { if (e.code === 'Space') spaceHeld = false; });
 
@@ -316,6 +342,7 @@ function draw() {
 
   // trails
   if (showTrails) {
+    ctx.globalAlpha = 0.35;
     for (const b of bodies) {
       if (b.trail.length < 4) continue;
       ctx.beginPath();
@@ -325,10 +352,11 @@ function draw() {
         const [x, y] = worldToScreen(b.trail[i], b.trail[i + 1]);
         ctx.lineTo(x, y);
       }
-      ctx.strokeStyle = b.color + '55';
+      ctx.strokeStyle = b.color;
       ctx.lineWidth = 1;
       ctx.stroke();
     }
+    ctx.globalAlpha = 1;
   }
 
   // drag preview
@@ -347,12 +375,14 @@ function draw() {
     const [x, y] = worldToScreen(b.x, b.y);
     const r = Math.max(1.5, b.radius * zoom);
     if (x < -50 || x > innerWidth + 50 || y < -50 || y > innerHeight + 50) continue;
-    // glow
+    // glow (works with any CSS color format)
+    ctx.globalAlpha = 0.4;
     const grad = ctx.createRadialGradient(x, y, 0, x, y, r * 3);
-    grad.addColorStop(0, b.color + '66');
+    grad.addColorStop(0, b.color);
     grad.addColorStop(1, 'transparent');
     ctx.fillStyle = grad;
     ctx.beginPath(); ctx.arc(x, y, r * 3, 0, 7); ctx.fill();
+    ctx.globalAlpha = 1;
     ctx.fillStyle = b.color;
     ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.fill();
     if (b.fixed) {
@@ -374,6 +404,12 @@ function draw() {
   // HUD
   ui.bodyCount.textContent = bodies.length;
   ui.collCount.textContent = totalCollisions;
+  if (followed) {
+    const speed = Math.hypot(followed.vx, followed.vy).toFixed(1);
+    document.getElementById('followName').textContent = `Body ${followed.id}`;
+    document.getElementById('followSpeed').textContent = speed;
+    document.getElementById('followMass').textContent = Math.round(followed.mass);
+  }
 }
 
 // ---------- Main loop ----------
@@ -398,6 +434,11 @@ function loop(now) {
       simTime += FIXED_DT;
     }
     if (acc > 1) acc = 0;
+  }
+  // camera follows the selected body
+  if (followed) {
+    if (!bodies.includes(followed)) { follow(null); }
+    else { camera.x = followed.x; camera.y = followed.y; }
   }
   draw();
   requestAnimationFrame(loop);

@@ -23,6 +23,7 @@ Open `index.html` in any modern browser (double-click, or `python3 -m http.serve
 | Launch a body | Drag on canvas (velocity = drag vector) |
 | Pan / zoom | Right-drag or Space+drag / mouse wheel |
 | Presets | Keys `1`–`5` or buttons |
+| Follow a body | Double-click it (Esc releases); camera tracks it + HUD shows speed/mass |
 | Pause / trails / vectors / clear | `P` / `T` / `V` / `C` / `F` |
 
 Energy behavior is stable over long runs thanks to Velocity Verlet; speed slider scales time up to 4×.
