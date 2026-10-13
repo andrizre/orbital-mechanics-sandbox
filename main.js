@@ -196,15 +196,10 @@ function presetCluster() {
 function presetFigure8() {
   // Chenciner–Montgomery figure-eight three-body orbit (equal masses)
   clearBodies();
-  // normalized solution coords, scaled
-  const s = 320, vs = s * 0.36;
-  const p = [
-    [0.97000436, -0.24308753, 0.4662036850, 0.4323657300],
-    [0.97000436, -0.24308753, 0.4662036850, 0.4323657300],
-    [-1, 0, -0.93240737, -0.86473146],
-  ];
-  const pos = [[p[0][0], p[0][1]], [p[1][0] * -1, p[1][1] * -1], [p[2][0], p[2][1]]];
-  // standard initial state: two bodies share one position mirrored
+  // normalized Chenciner–Montgomery solution; convert to sim units:
+  // v_real = v_norm * sqrt(G*M/L) so the orbit matches the sim's gravity
+  const s = 320, m = 300;
+  const vScale = Math.sqrt(G * m / s);
   const init = [
     [0.97000436, -0.24308753, 0.4662036850, 0.4323657300],
     [-0.97000436, 0.24308753, 0.4662036850, 0.4323657300],
@@ -212,9 +207,8 @@ function presetFigure8() {
   ];
   const colors = ['#ff9770', '#6ee7db', '#ffd166'];
   for (let i = 0; i < 3; i++) {
-    const m = 300;
     bodies.push(makeBody(init[i][0] * s, init[i][1] * s,
-      init[i][2] * vs * 2, init[i][3] * vs * 2, m, colors[i]));
+      init[i][2] * vScale, init[i][3] * vScale, m, colors[i]));
   }
   camera = { x: 0, y: 0 }; zoom = Math.min(innerWidth, innerHeight) / 1100;
 }
