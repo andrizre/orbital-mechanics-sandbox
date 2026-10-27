@@ -295,7 +295,15 @@ addEventListener('keydown', (e) => {
   if (e.key === 'v' || e.key === 'V') { showVectors = !showVectors; ui.vectors.checked = showVectors; }
   if (e.key === 'f' || e.key === 'F') { camera = { x: 0, y: 0 }; }
   if (e.key === 'Escape') follow(null);
+  if (e.key === 'Delete' || e.key === 'Backspace') deleteFollowed();
 });
+
+function deleteFollowed() {
+  if (!followed) return;
+  const i = bodies.indexOf(followed);
+  if (i !== -1) bodies.splice(i, 1);
+  follow(null);
+}
 addEventListener('keyup', (e) => { if (e.code === 'Space') spaceHeld = false; });
 
 // ---------- UI ----------
